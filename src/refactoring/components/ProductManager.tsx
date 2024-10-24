@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Product, Discount } from "../../types.ts";
+import { useProductForm } from "../hooks/useProductForm.ts";
+import { useAccordion } from "../hooks/useAccordion.ts";
 
 interface Props {
   products: Product[];
@@ -10,28 +12,8 @@ interface Props {
 const ProductManager = ({ products, onProductUpdate, onProductAdd }: Props) => {
   const [showNewProductForm, setShowNewProductForm] = useState(false);
 
-  const [newProduct, setNewProduct] = useState<Omit<Product, "id">>({
-    name: "",
-    price: 0,
-    stock: 0,
-    discounts: [],
-  });
-
-  const [openProductIds, setOpenProductIds] = useState<Set<string>>(new Set());
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [newDiscount, setNewDiscount] = useState<Discount>({ quantity: 0, rate: 0 });
-
-  const toggleProductAccordion = (productId: string) => {
-    setOpenProductIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(productId)) {
-        newSet.delete(productId);
-      } else {
-        newSet.add(productId);
-      }
-      return newSet;
-    });
-  };
 
   // handleEditProduct 함수 수정
   const handleEditProduct = (product: Product) => {
@@ -96,17 +78,8 @@ const ProductManager = ({ products, onProductUpdate, onProductAdd }: Props) => {
     }
   };
 
-  const handleAddNewProduct = () => {
-    const productWithId = { ...newProduct, id: Date.now().toString() };
-    onProductAdd(productWithId);
-    setNewProduct({
-      name: "",
-      price: 0,
-      stock: 0,
-      discounts: [],
-    });
-    setShowNewProductForm(false);
-  };
+  const { newProduct, setNewProduct, handleAddNewProduct } = useProductForm(onProductAdd);
+  const { openProductIds, toggleProductAccordion } = useAccordion();
 
   return (
     <div>
